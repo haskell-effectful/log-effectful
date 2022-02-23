@@ -5,7 +5,7 @@ with-compiler: ghc-8.10
 source-repository-package
   type: git
   location: https://github.com/haskell-effectful/effectful.git
-  tag: cfd958d
+  tag: a757b8f
   subdir: effectful effectful-core
 
 source-repository-package
