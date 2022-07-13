@@ -4,11 +4,5 @@ with-compiler: ghc-8.10
 
 source-repository-package
   type: git
-  location: https://github.com/haskell-effectful/effectful.git
-  tag: cfd958d
-  subdir: effectful effectful-core
-
-source-repository-package
-  type: git
   location: https://github.com/haskell-effectful/effectful-time.git
-  tag: 9986349
+  tag: a0ebb1d
