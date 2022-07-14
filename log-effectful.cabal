@@ -1,11 +1,11 @@
 cabal-version:      3.0
-name:               effectful-log-base
+name:               log-effectful
 version:            0.0.1.0
 homepage:
-  https://github.com/haskell-effectful/effectful-contrib#readme
+  https://github.com/haskell-effectful/log-effectful#readme
 
 bug-reports:
-  https://github.com/haskell-effectful/effectful-contrib/issues
+  https://github.com/haskell-effectful/log-effectful/issues
 
 author:             Dominik Peteler
 maintainer:         Dominik Peteler
@@ -18,7 +18,7 @@ extra-source-files:
 
 source-repository head
   type:     git
-  location: https://github.com/haskell-effectful/effectful-contrib
+  location: https://github.com/haskell-effectful/log-effectful
 
 common language
   ghc-options:        -Wall -Wcompat
@@ -52,7 +52,7 @@ library
     , text
     , time
 
-test-suite effectful-log-base-test
+test-suite log-effectful-test
   import:         language
   type:           exitcode-stdio-1.0
   hs-source-dirs: examples test
@@ -62,7 +62,7 @@ test-suite effectful-log-base-test
     , base
     , effectful
     , effectful-core
-    , effectful-log-base
+    , log-effectful
     , effectful-time
     , log-base
     , tasty
