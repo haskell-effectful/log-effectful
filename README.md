@@ -34,7 +34,7 @@ Use this `Logger` along with the other configuration options to handle the
 Log messages are written using one of the functions of the `log*` family found
 in `Effectful.Log`. Since log messages have a timestamp emitting those will
 incure a `Time :> es` constraint as well. Use one of the functions provided by
-the [`effectful-time`][effectful-time] package to handle that effect.
+the [`time-effectful`][time-effectful] package to handle that effect.
 
 Here is a full working example (also found in the `effectful-log-base/examples/`
 directory of this repository):
@@ -60,5 +60,5 @@ app = do
 ```
 
 [effectful]: https://github.com/haskell-effectful/effectful
-[effectful-time]: https://github.com/Kleidukos/effectful-contrib/effectful-time
+[time-effectful]: https://github.com/Kleidukos/effectful-contrib/time-effectful
 [log-base]: https://hackage.haskell.org/package/log-base
