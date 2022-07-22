@@ -22,7 +22,7 @@ import qualified Utils as U
 default (Text)
 
 main :: IO ()
-main = defaultMain $ testGroup "effectful-log-base"
+main = defaultMain $ testGroup "log-effectful"
     [ testCase "logMessage" testLogMessage
     , testCase "localData" testLocalData
     , testCase "localDomain" testLocalDomain

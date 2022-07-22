@@ -1,4 +1,4 @@
-# effectful-log-base
+# log-effectful
 
 ## Description
 
@@ -13,7 +13,7 @@ for the `Eff` monad.
 This library provides the following modules:
 
 - `Effectful.Log`
-  This is module contains the core of `effectful-log-base`. In particular, the
+  This is module contains the core of `log-effectful`. In particular, the
   `Logging` effect and the functions associated with it are defined here.
   Additionally, this module provides the `MonadLog` instance for the `Eff` monad.
 - `Effectful.Log.Backend.*`
@@ -24,8 +24,8 @@ This library provides the following modules:
   This module contains functions which are useful if you want to implement
   custom loggers.
 
-To start using `effectful-log-base` package you must obtain a `Logger` which
-serves as a sink for the log messages of your application.
+To start using `log-effectful` package you must obtain a `Logger` which serves
+as a sink for the log messages of your application.
 To do so, you must choose a logging backend. This backend usually comes with a
 function like `withSomeLogger :: (Logger -> Eff es a) -> Eff es a`.
 Use this `Logger` along with the other configuration options to handle the
@@ -34,10 +34,10 @@ Use this `Logger` along with the other configuration options to handle the
 Log messages are written using one of the functions of the `log*` family found
 in `Effectful.Log`. Since log messages have a timestamp emitting those will
 incure a `Time :> es` constraint as well. Use one of the functions provided by
-the [`effectful-time`][effectful-time] package to handle that effect.
+the [`time-effectful`][time-effectful] package to handle that effect.
 
-Here is a full working example (also found in the `effectful-log-base/examples/`
-directory of this repository):
+Here is a full working example (also found in the `examples/` directory of this
+repository):
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -60,5 +60,5 @@ app = do
 ```
 
 [effectful]: https://github.com/haskell-effectful/effectful
-[effectful-time]: https://github.com/Kleidukos/effectful-contrib/effectful-time
+[time-effectful]: https://github.com/haskell-effectful/time-effectful
 [log-base]: https://hackage.haskell.org/package/log-base
