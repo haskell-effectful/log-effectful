@@ -1,3 +1,8 @@
-dist-newstyle
+*.swp
+*~
+.ghc.environment.*
 .hie
 .hspec-failures
+cabal.project.local
+dist
+dist-*
