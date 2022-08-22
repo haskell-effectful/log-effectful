@@ -41,7 +41,7 @@ library
     , aeson
     , base            <=4.17
     , bytestring
-    , effectful-core  ^>=1.0.0.0
+    , effectful-core  ^>=2.1.0.0
     , log-base        >=0.11.0.0
     , text
     , time
