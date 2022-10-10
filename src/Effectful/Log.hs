@@ -1,20 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+-- | Logging via 'MonadLog'.
 module Effectful.Log
   ( -- * Effect
     Log
-  , MonadLog(..)
 
-    -- * Handlers
+    -- ** Handlers
   , runLog
 
-    -- * Utilities
-  , logAttention
-  , logInfo
-  , logTrace
-  , logAttention_
-  , logInfo_
-  , logTrace_
+    -- * Re-exports
+  , module Log
   ) where
 
 import Data.Text (Text)
@@ -29,9 +24,9 @@ data Log :: Effect
 type instance DispatchOf Log = Static WithSideEffects
 newtype instance StaticRep Log = Log LoggerEnv
 
--- | Run a 'Log' effect.
+-- | Run the 'Log' effect.
 --
--- This function is the effectful version of 'runLogT'.
+-- /Note:/ this is the @effectful@ version of 'runLogT'.
 runLog
   :: IOE :> es
   => Text
@@ -51,9 +46,7 @@ runLog component logger maxLogLevel = evalStaticRep $ Log LoggerEnv
   , leMaxLogLevel = maxLogLevel
   }
 
-----------------------------------------
--- Orphan instance
-
+-- | Orphan, canonical instance.
 instance Log :> es => MonadLog (Eff es) where
   logMessage level message data_ = do
     time <- unsafeEff_ getCurrentTime

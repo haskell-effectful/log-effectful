@@ -2,10 +2,8 @@
 module Main where
 
 import Effectful
-import Log
-import Log.Backend.StandardOutput
-
 import Effectful.Log
+import Log.Backend.StandardOutput
 
 main :: IO ()
 main = runEff $ do

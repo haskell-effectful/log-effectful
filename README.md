@@ -13,7 +13,6 @@ module Main where
 
 import Effectful
 import Effectful.Log
-import Log
 import Log.Backend.ElasticSearch
 import Log.Backend.StandardOutput
 
