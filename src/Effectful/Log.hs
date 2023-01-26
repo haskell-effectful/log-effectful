@@ -17,6 +17,7 @@ import Data.Time.Clock
 import Effectful.Dispatch.Static
 import Effectful
 import Log
+import Data.Aeson.Types (Pair)
 
 -- | Provide the ability to log messages via 'MonadLog'.
 data Log :: Effect
@@ -35,14 +36,18 @@ runLog
   -- ^ The logging back-end to use.
   -> LogLevel
   -- ^ The maximum log level allowed to be logged.
+  -> [Text]
+  -- ^ The current application domain.
+  -> [Pair]
+  -- ^ Additional data to be merged with the log message's data
   -> Eff (Log : es) a
   -- ^ The computation to run.
   -> Eff es a
-runLog component logger maxLogLevel = evalStaticRep $ Log LoggerEnv
+runLog component logger maxLogLevel domain additionalData = evalStaticRep $ Log LoggerEnv
   { leLogger = logger
   , leComponent = component
-  , leDomain = []
-  , leData = []
+  , leDomain = domain
+  , leData = additionalData
   , leMaxLogLevel = maxLogLevel
   }
 

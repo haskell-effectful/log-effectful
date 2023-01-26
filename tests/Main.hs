@@ -8,7 +8,7 @@ import Log.Backend.StandardOutput
 main :: IO ()
 main = runEff $ do
   withStdOutLogger $ \logger -> do
-    runLog "main" logger defaultLogLevel app
+    runLog "main" logger defaultLogLevel [] [] app
 
 app :: Log :> es => Eff es ()
 app = localData ["local_char" .= 'x'] $ do
