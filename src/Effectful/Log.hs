@@ -47,7 +47,7 @@ runLog component logger maxLogLevel = runLogWithEnv $ LoggerEnv
   , leMaxLogLevel = maxLogLevel
   }
 
--- | Run the 'Log' effect with full logging options
+-- | Run the 'Log' effect with full logging options.
 runLogWithEnv
   :: IOE :> es
   => LoggerEnv
