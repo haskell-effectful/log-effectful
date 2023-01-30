@@ -39,7 +39,7 @@ runLog
   -> Eff (Log : es) a
   -- ^ The computation to run.
   -> Eff es a
-runLog component logger maxLogLevel = evalStaticRep $ Log LoggerEnv
+runLog component logger maxLogLevel = runLogWithEnv $ LoggerEnv
   { leLogger = logger
   , leComponent = component
   , leDomain = []

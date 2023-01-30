@@ -58,7 +58,6 @@ library
                    , log-base        >=0.12.0.0
                    , text
                    , time
-                   , aeson
 
   hs-source-dirs:  src
 
@@ -70,7 +69,6 @@ test-suite test
   ghc-options:     -threaded -rtsopts
 
   build-depends:     base
-                   , aeson
                    , effectful-core
                    , log-base
                    , log-effectful
