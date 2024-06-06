@@ -3,7 +3,7 @@
 -- | Logging via 'MonadLog'.
 module Effectful.Log
   ( -- * Effect
-    Log
+    Log (..)
 
     -- ** Handlers
   , runLog
@@ -12,17 +12,23 @@ module Effectful.Log
   , module Log
   ) where
 
+import Data.Aeson.Types
 import Data.Text (Text)
 import Data.Time.Clock
-import Effectful.Dispatch.Static
+import Effectful.Dispatch.Dynamic
+import Effectful.Reader.Static
 import Effectful
 import Log
 
 -- | Provide the ability to log messages via 'MonadLog'.
-data Log :: Effect
+data Log :: Effect where
+  LogMessageOp :: LogLevel -> Text -> Value -> Log m ()
+  LocalData :: [Pair] -> m a -> Log m a
+  LocalDomain :: Text -> m a -> Log m a
+  LocalMaxLogLevel :: LogLevel -> m a -> Log m a
+  GetLoggerEnv :: Log m LoggerEnv
 
-type instance DispatchOf Log = Static WithSideEffects
-newtype instance StaticRep Log = Log LoggerEnv
+type instance DispatchOf Log = Dynamic
 
 -- | Run the 'Log' effect.
 --
@@ -38,30 +44,31 @@ runLog
   -> Eff (Log : es) a
   -- ^ The computation to run.
   -> Eff es a
-runLog component logger maxLogLevel = evalStaticRep $ Log LoggerEnv
-  { leLogger = logger
-  , leComponent = component
-  , leDomain = []
-  , leData = []
-  , leMaxLogLevel = maxLogLevel
-  }
+runLog component logger maxLogLevel = reinterpret reader $ \env -> \case
+  LogMessageOp level message data_ -> do
+    time <- liftIO getCurrentTime
+    logEnv <- ask
+    liftIO $ logMessageIO logEnv time level message data_
+  LocalData data_ action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
+  LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
+  LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
+  GetLoggerEnv -> ask
+  where
+    reader = runReader LoggerEnv
+      { leLogger = logger
+      , leComponent = component
+      , leDomain = []
+      , leData = []
+      , leMaxLogLevel = maxLogLevel
+      }
 
 -- | Orphan, canonical instance.
 instance Log :> es => MonadLog (Eff es) where
-  logMessage level message data_ = do
-    time <- unsafeEff_ getCurrentTime
-    Log logEnv <- getStaticRep
-    unsafeEff_ $ logMessageIO logEnv time level message data_
-
-  localData data_ = localStaticRep $ \(Log logEnv) ->
-    Log logEnv { leData = data_ ++ leData logEnv }
-
-  localDomain domain = localStaticRep $ \(Log logEnv) ->
-    Log logEnv { leDomain = leDomain logEnv ++ [domain] }
-
-  localMaxLogLevel level = localStaticRep $ \(Log logEnv) ->
-    Log logEnv { leMaxLogLevel = level }
-
-  getLoggerEnv = do
-    Log env <- getStaticRep
-    pure env
+  logMessage level message data_ = send $ LogMessageOp level message data_
+  localData data_ action = send $ LocalData data_ action
+  localDomain domain action = send $ LocalDomain domain action
+  localMaxLogLevel level action = send $ LocalMaxLogLevel level action
+  getLoggerEnv = send GetLoggerEnv
