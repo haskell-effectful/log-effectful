@@ -41,6 +41,7 @@ common language
                       LambdaCase
                       MultiParamTypeClasses
                       NoStarIsType
+                      OverloadedStrings
                       RankNTypes
                       RoleAnnotations
                       ScopedTypeVariables
@@ -56,6 +57,7 @@ library
   build-depends:     base            <5
                    , aeson           >=2.0.0.0
                    , effectful-core  >=1.0.0.0    && <3.0.0.0
+                   , lifted-base
                    , log-base        >=0.12.0.0
                    , text
                    , time
