@@ -1,3 +1,6 @@
+# log-effectful-1.2.0.0 (2025-06-23)
+* Log any uncaught exception
+
 # log-effectful-1.0.1.0 (2024-11-07)
 * Convert `Log` into a dynamically dispatched effect.
 
