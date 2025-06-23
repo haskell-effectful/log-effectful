@@ -12,11 +12,11 @@ module Effectful.Log
   , module Log
   ) where
 
-import Control.Exception.Lifted
 import Data.Aeson.Types
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import Data.Time.Clock
 import Effectful.Dispatch.Dynamic
+import Effectful.Exception
 import Effectful.Reader.Static
 import Effectful
 import Log
@@ -46,18 +46,7 @@ runLog
   -- ^ The computation to run.
   -> Eff es a
 runLog component logger maxLogLevel =
-  reinterpret reader (\env -> \case
-    LogMessageOp level message data_ -> do
-      time <- liftIO getCurrentTime
-      logEnv <- ask
-      liftIO $ logMessageIO logEnv time level message data_
-    LocalData data_ action -> localSeqUnlift env $ \unlift -> do
-      (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
-    LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
-      (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
-    LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
-      (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
-    GetLoggerEnv -> ask) . handle logException
+  reinterpret reader effectHandler . handle logException
   where
     reader = runReader LoggerEnv
       { leLogger = logger
@@ -66,13 +55,23 @@ runLog component logger maxLogLevel =
       , leData = []
       , leMaxLogLevel = maxLogLevel
       }
+    effectHandler :: (IOE :> handlerEs, Reader LoggerEnv :> handlerEs) => EffectHandler Log handlerEs
+    effectHandler env = \case
+      LogMessageOp level message data_ -> do
+        time <- liftIO getCurrentTime
+        logEnv <- ask
+        liftIO $ logMessageIO logEnv time level message data_
+      LocalData data_ action -> localSeqUnlift env $ \unlift -> do
+        (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
+      LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
+        (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
+      LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
+        (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
+      GetLoggerEnv -> ask
     logException :: (IOE :> es, Log :> es) => SomeException -> Eff es a
     logException (SomeException e) = do
-      time <- liftIO getCurrentTime
-      logEnv <- getLoggerEnv
-      liftIO $
-        logMessageIO logEnv time LogAttention "Uncaught exception" $ object ["error" .= (pack . show $ e)]
-      throw e
+      logAttention "Uncaught exception" $ object ["error" .= show e]
+      throwIO e
 
 -- | Orphan, canonical instance.
 instance Log :> es => MonadLog (Eff es) where
