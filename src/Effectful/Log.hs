@@ -7,6 +7,7 @@ module Effectful.Log
 
     -- ** Handlers
   , runLog
+  , runNoLog
 
     -- * Re-exports
   , module Log
@@ -33,6 +34,10 @@ type instance DispatchOf Log = Dynamic
 -- | Run the 'Log' effect.
 --
 -- /Note:/ this is the @effectful@ version of 'runLogT'.
+--
+-- /Note:/ logging can be skipped by passing 'mempty' as the 'Logger', which
+-- discards all messages while still requiring 'IOE'. Use 'runNoLog' instead
+-- if 'IOE' is not otherwise present in the type signature.
 runLog
   :: IOE :> es
   => Text
@@ -63,6 +68,30 @@ runLog component logger maxLogLevel = reinterpret reader $ \env -> \case
       , leDomain = []
       , leData = []
       , leMaxLogLevel = maxLogLevel
+      }
+
+-- | Run the 'Log' effect by discarding all messages.
+--
+-- This is useful for skipping the 'Log' effect when it is present in the
+-- type signature but no actual logging back-end is available, e.g. when
+-- running pure code with 'runPureEff'.
+runNoLog :: Eff (Log : es) a -> Eff es a
+runNoLog = reinterpret reader $ \env -> \case
+  LogMessageOp {} -> pure ()
+  LocalData data_ action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
+  LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
+  LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
+    (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
+  GetLoggerEnv -> ask
+  where
+    reader = runReader LoggerEnv
+      { leLogger = mempty
+      , leComponent = mempty
+      , leDomain = []
+      , leData = []
+      , leMaxLogLevel = defaultLogLevel
       }
 
 -- | Orphan, canonical instance.

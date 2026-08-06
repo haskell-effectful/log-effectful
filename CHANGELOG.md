@@ -1,3 +1,7 @@
+# log-effectful-1.0.2.0 (unreleased)
+* Add `runNoLog`, a handler that discards all log messages without requiring
+  `IOE` in the effect stack.
+
 # log-effectful-1.0.1.0 (2024-11-07)
 * Convert `Log` into a dynamically dispatched effect.
 
