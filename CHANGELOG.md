@@ -1,4 +1,4 @@
-# log-effectful-1.0.2.0 (unreleased)
+# log-effectful-1.0.2.0 (2026-08-11)
 * Add `runNoLog`, a handler that discards all log messages without requiring
   `IOE` in the effect stack.
 
