@@ -1,5 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
+
 -- | Logging via 'MonadLog'.
 module Effectful.Log
   ( -- * Effect
@@ -16,9 +17,9 @@ module Effectful.Log
 import Data.Aeson.Types
 import Data.Text (Text)
 import Data.Time.Clock
+import Effectful
 import Effectful.Dispatch.Dynamic
 import Effectful.Reader.Static
-import Effectful
 import Log
 
 -- | Provide the ability to log messages via 'MonadLog'.
@@ -55,20 +56,22 @@ runLog component logger maxLogLevel = reinterpret reader $ \env -> \case
     logEnv <- ask
     liftIO $ logMessageIO logEnv time level message data_
   LocalData data_ action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
+    (`local` unlift action) $ \logEnv -> logEnv {leData = data_ ++ leData logEnv}
   LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
+    (`local` unlift action) $ \logEnv -> logEnv {leDomain = leDomain logEnv ++ [domain]}
   LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
+    (`local` unlift action) $ \logEnv -> logEnv {leMaxLogLevel = level}
   GetLoggerEnv -> ask
   where
-    reader = runReader LoggerEnv
-      { leLogger = logger
-      , leComponent = component
-      , leDomain = []
-      , leData = []
-      , leMaxLogLevel = maxLogLevel
-      }
+    reader =
+      runReader
+        LoggerEnv
+          { leLogger = logger
+          , leComponent = component
+          , leDomain = []
+          , leData = []
+          , leMaxLogLevel = maxLogLevel
+          }
 
 -- | Run the 'Log' effect by discarding all messages.
 --
@@ -79,20 +82,22 @@ runNoLog :: Eff (Log : es) a -> Eff es a
 runNoLog = reinterpret reader $ \env -> \case
   LogMessageOp {} -> pure ()
   LocalData data_ action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leData = data_ ++ leData logEnv }
+    (`local` unlift action) $ \logEnv -> logEnv {leData = data_ ++ leData logEnv}
   LocalDomain domain action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leDomain = leDomain logEnv ++ [domain] }
+    (`local` unlift action) $ \logEnv -> logEnv {leDomain = leDomain logEnv ++ [domain]}
   LocalMaxLogLevel level action -> localSeqUnlift env $ \unlift -> do
-    (`local` unlift action) $ \logEnv -> logEnv { leMaxLogLevel = level }
+    (`local` unlift action) $ \logEnv -> logEnv {leMaxLogLevel = level}
   GetLoggerEnv -> ask
   where
-    reader = runReader LoggerEnv
-      { leLogger = mempty
-      , leComponent = mempty
-      , leDomain = []
-      , leData = []
-      , leMaxLogLevel = defaultLogLevel
-      }
+    reader =
+      runReader
+        LoggerEnv
+          { leLogger = mempty
+          , leComponent = mempty
+          , leDomain = []
+          , leData = []
+          , leMaxLogLevel = defaultLogLevel
+          }
 
 -- | Orphan, canonical instance.
 instance Log :> es => MonadLog (Eff es) where
