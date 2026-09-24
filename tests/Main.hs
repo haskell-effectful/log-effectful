@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Effectful
@@ -12,6 +13,7 @@ main = runEff $ do
 
 app :: Log :> es => Eff es ()
 app = localData ["local_char" .= 'x'] $ do
-  logInfo "Hello!" $ object
-    [ "payload" .= (123::Int)
-    ]
+  logInfo "Hello!" $
+    object
+      [ "payload" .= (123 :: Int)
+      ]
